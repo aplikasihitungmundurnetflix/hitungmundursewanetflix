@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Hitung Mundur Sewa Netflix</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #141414;
+            color: #e5e5e5;
+            display: flex;
+            flex-direction: column; /* Mengubah arah flex untuk menempatkan footer di bawah */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #222;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1, h2 {
+            color: #E50914;
+            font-weight: 700;
+            text-align: center;
+        }
+        
+        #setup-form {
+            display: none; /* Defaultnya disembunyikan, diatur oleh JS */
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #ccc;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            background-color: #333;
+            border: 1px solid #555;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #E50914;
+        }
+        
+        #start-btn {
+            background-color: #E50914;
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+        }
+        
+        #start-btn:hover {
+            background-color: #f6121d;
+        }
+
+        #countdown-display {
+            display: none; /* Defaultnya disembunyikan, diatur oleh JS */
+            text-align: center;
+        }
+        
+        .info-penyewaan {
+            background: #333;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+            text-align: left;
+        }
+        
+        .info-penyewaan p {
+            margin: 10px 0;
+            font-size: 1em;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .info-penyewaan p:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .info-penyewaan strong {
+            color: #fff;
+            margin-right: 15px;
+        }
+        
+        .info-penyewaan span {
+            color: #e5e5e5;
+            text-align: right;
+        }
+        
+        #countdown {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .time-box {
+            background: #E50914;
+            color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            min-width: 90px;
+        }
+        
+        .time-box span {
+            font-size: 2.5em;
+            font-weight: 700;
+            display: block;
+        }
+        
+        .time-box .label {
+            font-size: 0.8em;
+            text-transform: uppercase;
+        }
+        
+        #pesan-selesai {
+            display: none;
+            font-size: 2em;
+            color: #E50914;
+            font-weight: bold;
+        }
+
+        #reset-btn {
+            background-color: #555;
+            color: #fff;
+            border: none;
+            padding: 10px 18px;
+            font-size: 0.9em;
+            font-weight: 600;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: background-color 0.2s;
+            display: none;
+        }
+
+        #reset-btn:hover {
+            background-color: #666;
+        }
+
+        /* --- MODIFIKASI CSS HAK CIPTA DIMULAI --- */
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #777;
+            font-size: 0.9em;
+        }
+        /* --- MODIFIKASI CSS HAK CIPTA SELESAI --- */
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="setup-form">
+            <h1>Masukkan Item Yang Anda Sewa</h1>
+            <form id="generator-form">
+                <div class="form-group">
+                    <label for="namaPenyewaan">Nama Paket Yang Di Sewa</label>
+                    <input type="text" id="namaPenyewaan" value="Gudang Akun Murah" required>
+                </div>
+                <div class="form-group">
+                    <label for="namaPelanggan">Nama Pelanggan</label>
+                    <input type="text" id="namaPelanggan" placeholder="cth: Budi Santoso" required>
+                </div>
+                <div class="form-group">
+                    <label for="hargaSewa">Harga Sewa</label>
+                    <input type="text" id="hargaSewa" placeholder="cth: Rp 35.000 / bulan" required>
+                </div>
+                <div class="form-group">
+                    <label for="tanggalMulai">Tanggal Mulai Sewa</label>
+                    <input type="date" id="tanggalMulai" required>
+                </div>
+                <div class="form-group">
+                    <label for="tanggalSelesai">Tanggal Selesai Sewa</label>
+                    <input type="date" id="tanggalSelesai" required>
+                </div>
+                <div class="form-group">
+                    <label for="waktuSelesai">Waktu Selesai Sewa (Jam)</label>
+                    <input type="time" id="waktuSelesai" required>
+                </div>
+                <button type="submit" id="start-btn">Mulai Hitung Mundur</button>
+            </form>
+        </div>
+
+        <div id="countdown-display">
+            <h2>Waktu Sewa Akan Berakhir</h2>
+            <div class="info-penyewaan">
+                <p><strong>Nama Paket Yang di Sewa:</strong> <span id="info-nama-penyewaan"></span></p>
+                <p><strong>Pelanggan:</strong> <span id="info-nama-pelanggan"></span></p>
+                <p><strong>Mulai Sewa:</strong> <span id="info-tanggal-mulai"></span></p>
+                <p><strong>Harga:</strong> <span id="info-harga-sewa"></span></p>
+            </div>
+            <div id="countdown">
+                <div class="time-box"><span id="hari">00</span><div class="label">Hari</div></div>
+                <div class="time-box"><span id="jam">00</span><div class="label">Jam</div></div>
+                <div class="time-box"><span id="menit">00</span><div class="label">Menit</div></div>
+                <div class="time-box"><span id="detik">00</span><div class="label">Detik</div></div>
+            </div>
+            <div id="pesan-selesai">
+                <h2>Waktu Sewa Telah Habis!</h2>
+            </div>
+            <button id="reset-btn">Buat Hitung Mundur Baru</button>
+        </div>
+    </div>
+
+    <footer>
+        <p id="copyright-text"></p>
+    </footer>
+    <script>
+        let countdownInterval;
+
+        const formContainer = document.getElementById('setup-form');
+        const countdownContainer = document.getElementById('countdown-display');
+        const generatorForm = document.getElementById('generator-form');
+        const resetButton = document.getElementById('reset-btn');
+
+        async function mintaIzinNotifikasi() {
+            if (!("Notification" in window)) {
+                console.error("Browser ini tidak mendukung notifikasi desktop.");
+                return;
+            }
+            if (Notification.permission === 'default') {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    console.log('Izin notifikasi berhasil diberikan.');
+                } else {
+                    console.error('Izin notifikasi tidak diberikan oleh pengguna.');
+                }
+            }
+        }
+
+        function formatTanggalIndonesia(dateString) {
+            if (!dateString) return '';
+            const [tahun, bulan, tanggal] = dateString.split('-');
+            const namaBulan = [
+                'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+            ];
+            return `${parseInt(tanggal)} ${namaBulan[parseInt(bulan) - 1]} ${tahun}`;
+        }
+
+        function startCountdown(data) {
+            document.getElementById('info-nama-penyewaan').textContent = data.namaPenyewaan;
+            document.getElementById('info-nama-pelanggan').textContent = data.namaPelanggan;
+            document.getElementById('info-harga-sewa').textContent = data.hargaSewa;
+            document.getElementById('info-tanggal-mulai').textContent = formatTanggalIndonesia(data.tanggalMulai);
+
+            formContainer.style.display = 'none';
+            countdownContainer.style.display = 'block';
+
+            document.getElementById("countdown").style.display = "flex";
+            document.getElementById("pesan-selesai").style.display = "none";
+            
+            resetButton.style.display = 'none';
+            
+            const tanggalSelesai = new Date(data.waktuSelesaiISO).getTime();
+
+            countdownInterval = setInterval(function() {
+                const sekarang = new Date().getTime();
+                const selisih = tanggalSelesai - sekarang;
+
+                if (selisih < 0) {
+                    clearInterval(countdownInterval);
+                    document.getElementById("countdown").style.display = "none";
+                    document.getElementById("pesan-selesai").style.display = "block";
+                    resetButton.style.display = 'block'; 
+
+                    if (Notification.permission === 'granted') {
+                        new Notification('Waktu Sewa Telah Habis!', {
+                            body: `Sewa untuk pelanggan "${data.namaPelanggan}" telah berakhir.`,
+                        });
+                    }
+                    return;
+                }
+
+                const hari = Math.floor(selisih / (1000 * 60 * 60 * 24));
+                const jam = Math.floor((selisih % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const menit = Math.floor((selisih % (1000 * 60 * 60)) / (1000 * 60));
+                const detik = Math.floor((selisih % (1000 * 60)) / 1000);
+
+                document.getElementById("hari").innerText = String(hari).padStart(2, '0');
+                document.getElementById("jam").innerText = String(jam).padStart(2, '0');
+                document.getElementById("menit").innerText = String(menit).padStart(2, '0');
+                document.getElementById("detik").innerText = String(detik).padStart(2, '0');
+            }, 1000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- MODIFIKASI JS HAK CIPTA DIMULAI ---
+            const currentYear = new Date().getFullYear();
+            const copyrightElement = document.getElementById('copyright-text');
+            // Anda bisa mengganti "Nama Anda" dengan nama Anda atau nama perusahaan
+            copyrightElement.textContent = ` © Studioofficialridho ${currentYear}  - Support by: lensamedan.id - All Right Reserved.`;
+            // --- MODIFIKASI JS HAK CIPTA SELESAI ---
+
+            const savedDataJSON = localStorage.getItem('savedCountdownData');
+
+            if (savedDataJSON) {
+                const savedData = JSON.parse(savedDataJSON);
+                startCountdown(savedData);
+            } else {
+                formContainer.style.display = 'block';
+                countdownContainer.style.display = 'none';
+            }
+            
+            generatorForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await mintaIzinNotifikasi();
+
+                const dataToSave = {
+                    namaPenyewaan: document.getElementById('namaPenyewaan').value,
+                    namaPelanggan: document.getElementById('namaPelanggan').value,
+                    hargaSewa: document.getElementById('hargaSewa').value,
+                    tanggalMulai: document.getElementById('tanggalMulai').value,
+                    waktuSelesaiISO: `${document.getElementById('tanggalSelesai').value}T${document.getElementById('waktuSelesai').value}:00`
+                };
+
+                localStorage.setItem('savedCountdownData', JSON.stringify(dataToSave));
+                startCountdown(dataToSave);
+            });
+
+            resetButton.addEventListener('click', function() {
+                clearInterval(countdownInterval);
+                localStorage.removeItem('savedCountdownData');
+                formContainer.style.display = 'block';
+                countdownContainer.style.display = 'none';
+                generatorForm.reset();
+            });
+        });
+    </script>
+</body>
+</html>
