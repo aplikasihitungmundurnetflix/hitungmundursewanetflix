@@ -12,7 +12,7 @@
             background-color: #141414;
             color: #e5e5e5;
             display: flex;
-            flex-direction: column; /* Mengubah arah flex untuk menempatkan footer di bawah */
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
@@ -27,6 +27,8 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
             max-width: 600px;
             width: 100%;
+            position: relative;
+            z-index: 1;
         }
 
         h1, h2 {
@@ -36,7 +38,7 @@
         }
         
         #setup-form {
-            display: none; /* Defaultnya disembunyikan, diatur oleh JS */
+            display: none;
         }
 
         .form-group {
@@ -86,7 +88,7 @@
         }
 
         #countdown-display {
-            display: none; /* Defaultnya disembunyikan, diatur oleh JS */
+            display: none;
             text-align: center;
         }
         
@@ -170,18 +172,66 @@
             display: none;
         }
 
-        #reset-btn:hover {
-            background-color: #666;
-        }
-
-        /* --- MODIFIKASI CSS HAK CIPTA DIMULAI --- */
         footer {
             margin-top: 40px;
             text-align: center;
             color: #777;
             font-size: 0.9em;
         }
-        /* --- MODIFIKASI CSS HAK CIPTA SELESAI --- */
+
+        /* --- AWAL: CSS UNTUK NOTIFIKASI POP-UP (MODAL) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none; /* Defaultnya disembunyikan */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #2d2d2d;
+            padding: 25px 35px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 90%;
+            max-width: 450px;
+            position: relative;
+            border-top: 5px solid #E50914;
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            font-size: 1.8em;
+        }
+
+        .modal-content p {
+            font-size: 1.1em;
+            color: #ccc;
+            margin-bottom: 25px;
+        }
+
+        .modal-close-btn {
+            background-color: #E50914;
+            color: #fff;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            transition: background-color 0.2s;
+        }
+        
+        .modal-close-btn:hover {
+             background-color: #f6121d;
+        }
+        /* --- AKHIR: CSS UNTUK NOTIFIKASI POP-UP (MODAL) --- */
 
     </style>
 </head>
@@ -239,10 +289,18 @@
             <button id="reset-btn">Buat Hitung Mundur Baru</button>
         </div>
     </div>
-
+    
     <footer>
         <p id="copyright-text"></p>
     </footer>
+
+    <div id="notification-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Waktu Sewa Sudah Habis</h2>
+            <p id="modal-body-text"></p>
+            <button class="modal-close-btn">Tutup</button>
+        </div>
+    </div>
     <script>
         let countdownInterval;
 
@@ -251,18 +309,20 @@
         const generatorForm = document.getElementById('generator-form');
         const resetButton = document.getElementById('reset-btn');
 
+        // --- AWAL: Deklarasi variabel untuk elemen modal ---
+        const modal = document.getElementById('notification-modal');
+        const modalBodyText = document.getElementById('modal-body-text');
+        const closeModalBtn = document.querySelector('.modal-close-btn');
+        // --- AKHIR: Deklarasi variabel untuk elemen modal ---
+
         async function mintaIzinNotifikasi() {
+            // Fungsi ini tetap ada jika Anda masih ingin notifikasi browser sebagai cadangan
             if (!("Notification" in window)) {
                 console.error("Browser ini tidak mendukung notifikasi desktop.");
                 return;
             }
             if (Notification.permission === 'default') {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                    console.log('Izin notifikasi berhasil diberikan.');
-                } else {
-                    console.error('Izin notifikasi tidak diberikan oleh pengguna.');
-                }
+                await Notification.requestPermission();
             }
         }
 
@@ -302,11 +362,19 @@
                     document.getElementById("pesan-selesai").style.display = "block";
                     resetButton.style.display = 'block'; 
 
+                    // --- AWAL: MODIFIKASI UNTUK MENAMPILKAN POP-UP ---
+                    // Mengisi konten pop-up dan menampilkannya
+                    modalBodyText.textContent = `Sewa untuk pelanggan "${data.namaPelanggan}" telah berakhir.`;
+                    modal.style.display = 'flex';
+                    // --- AKHIR: MODIFIKASI UNTUK MENAMPILKAN POP-UP ---
+
+                    /* // Kode notifikasi browser yang lama bisa dihapus atau dijadikan komentar seperti ini
                     if (Notification.permission === 'granted') {
                         new Notification('Waktu Sewa Telah Habis!', {
                             body: `Sewa untuk pelanggan "${data.namaPelanggan}" telah berakhir.`,
                         });
                     }
+                    */
                     return;
                 }
 
@@ -323,12 +391,9 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // --- MODIFIKASI JS HAK CIPTA DIMULAI ---
             const currentYear = new Date().getFullYear();
             const copyrightElement = document.getElementById('copyright-text');
-            // Anda bisa mengganti "Nama Anda" dengan nama Anda atau nama perusahaan
             copyrightElement.textContent = ` © Studioofficialridho ${currentYear}  - Support by: lensamedan.id - All Right Reserved.`;
-            // --- MODIFIKASI JS HAK CIPTA SELESAI ---
 
             const savedDataJSON = localStorage.getItem('savedCountdownData');
 
@@ -342,7 +407,7 @@
             
             generatorForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                await mintaIzinNotifikasi();
+                await mintaIzinNotifikasi(); // Tetap meminta izin notifikasi browser jika diperlukan
 
                 const dataToSave = {
                     namaPenyewaan: document.getElementById('namaPenyewaan').value,
@@ -363,6 +428,22 @@
                 countdownContainer.style.display = 'none';
                 generatorForm.reset();
             });
+
+            // --- AWAL: Logika untuk menutup pop-up ---
+            function closeModal() {
+                modal.style.display = 'none';
+            }
+
+            // Menutup modal saat tombol 'Tutup' diklik
+            closeModalBtn.addEventListener('click', closeModal);
+
+            // Menutup modal saat area gelap di luar pop-up diklik
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+            // --- AKHIR: Logika untuk menutup pop-up ---
         });
     </script>
 </body>
